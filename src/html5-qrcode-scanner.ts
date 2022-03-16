@@ -102,6 +102,7 @@ function toHtml5QrcodeFullConfig(
 export class Html5QrcodeScanner {
 
     //#region private fields
+    private elementId: string;
     private element: HTMLElement;
     private config: Html5QrcodeScannerConfig;
     private verbose: boolean;
@@ -136,8 +137,13 @@ export class Html5QrcodeScanner {
                 throw `HTML Element with id=${element} not found`;
             }
 
+            this.elementId = element;
             this.element = document.getElementById(element)!;
         } else {
+            if (typeof element.id === 'undefined') {
+                throw `HTML Element must have an id`;
+            }
+            this.elementId = element.id;
             this.element = element;
         }
 
