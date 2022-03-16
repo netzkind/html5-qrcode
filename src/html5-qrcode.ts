@@ -235,7 +235,7 @@ interface QrcodeRegionBounds {
 export class Html5Qrcode {
 
     //#region Private fields.
-    private elementId: string;
+    private element: HTMLElement;
     private verbose: boolean;
     private qrcode: QrcodeDecoderAsync;
     private shouldScan: boolean;
@@ -245,7 +245,6 @@ export class Html5Qrcode {
     // TODO(mebjas): Reduce the statefulness of this mammoth class, by splitting
     // into independent classes for better separation of concerns and reducing
     // error prone nature of a large stateful class.
-    private element: HTMLElement | null = null;
     private canvasElement: HTMLCanvasElement | null = null;
     private scannerPausedUiElement: HTMLDivElement | null = null;
     private hasBorderShaders: boolean | null = null;
@@ -267,7 +266,7 @@ export class Html5Qrcode {
     /**
      * Initialize the code scanner.
      *
-     * @param elementId Id of the HTML element.
+     * @param element Id of the HTML element, or the HTML element itself.
      * @param configOrVerbosityFlag optional, config object of type {@interface
      * Html5QrcodeFullConfig} or a boolean verbosity flag (to maintain backward
      * compatibility). If nothing is passed, default values would be used.
@@ -279,13 +278,19 @@ export class Html5Qrcode {
      * 
      * TODO(mebjas): Deprecate the verbosity boolean flag completely.
      */
-    public constructor(elementId: string, 
+    public constructor(element: string | HTMLElement, 
         configOrVerbosityFlag?: boolean | Html5QrcodeFullConfig | undefined) {
-        if (!document.getElementById(elementId)) {
-            throw `HTML Element with id=${elementId} not found`;
+
+        if (typeof element === "string") {
+            if (!document.getElementById(element)) {
+                throw `HTML Element with id=${element} not found`;
+            }
+
+            this.element = document.getElementById(element)!;
+        } else {
+            this.element = element;
         }
 
-        this.elementId = elementId;
         this.verbose = false;
         let experimentalFeatureConfig;
         
@@ -367,7 +372,7 @@ export class Html5Qrcode {
 
         // qr shaded box
         const isShadedBoxEnabled = internalConfig.isShadedBoxEnabled();
-        const element = document.getElementById(this.elementId)!;
+        const element = this.element!;
         const rootElementWidth = element.clientWidth
             ? element.clientWidth : Constants.DEFAULT_WIDTH;
         element.style.position = "relative";
@@ -527,7 +532,7 @@ export class Html5Qrcode {
             if (!this.element) {
                 return;
             }
-            let childElement = document.getElementById(Constants.SHADED_REGION_ELEMENT_ID);
+            let childElement = (this.element.getRootNode() as Document|ShadowRoot).getElementById(Constants.SHADED_REGION_ELEMENT_ID);
             if (childElement) {
                 this.element.removeChild(childElement);
             }
@@ -640,7 +645,7 @@ export class Html5Qrcode {
             inputImage.onload = () => {
                 const imageWidth = inputImage.width;
                 const imageHeight = inputImage.height;
-                const element = document.getElementById(this.elementId)!;
+                const element = this.element!;
                 const containerWidth = element.clientWidth
                     ? element.clientWidth : Constants.DEFAULT_WIDTH;
                 // No default height anymore.
@@ -1452,7 +1457,7 @@ export class Html5Qrcode {
         if (this.stateManagerProxy.isScanning()) {
             throw "Cannot clear while scan is ongoing, close it first.";
         }
-        const element = document.getElementById(this.elementId);
+        const element = this.element;
         if (element) {
             element.innerHTML = "";
         }

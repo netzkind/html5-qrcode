@@ -518,10 +518,10 @@ class Html5Qrcode {
   /**
    * Initialize QR Code scanner.
    * 
-   * @param elementId - Id of the HTML element.
+   * @param element - Id of the HTML element, or the HTML element itself.
    * @param verbose - optional configuration object
    */
-  constructor(elementId: string, config:  Html5QrcodeFullConfig | undefined) {}
+  constructor(element: string | HTMLElement, config:  Html5QrcodeFullConfig | undefined) {}
 
   /**
    * Start scanning QR codes or barcodes for a given camera.
@@ -606,12 +606,12 @@ class Html5QrcodeScanner {
   /**
    * Creates an instance of this class.
    *
-   * @param elementId Id of the HTML element.
+   * @param element Id of the HTML element, or the HTML element itself.
    * @param config Extra configurations to tune the code scanner.
    * @param verbose - If true, all logs would be printed to console. 
    */
   constructor(
-    elementId: string,
+    element: string | HTMLElement,
     config: Html5QrcodeScannerConfig | undefined,
     verbose: boolean | undefined) {}
 

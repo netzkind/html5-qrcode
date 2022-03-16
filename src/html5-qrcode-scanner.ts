@@ -102,7 +102,7 @@ function toHtml5QrcodeFullConfig(
 export class Html5QrcodeScanner {
 
     //#region private fields
-    private elementId: string;
+    private element: HTMLElement;
     private config: Html5QrcodeScannerConfig;
     private verbose: boolean;
     private currentScanType: Html5QrcodeScanType;
@@ -122,21 +122,28 @@ export class Html5QrcodeScanner {
     /**
      * Creates instance of this class.
      *
-     * @param elementId Id of the HTML element.
+     * @param element Id of the HTML element, or the HTML element itself.
      * @param config Extra configurations to tune the code scanner.
      * @param verbose - If true, all logs would be printed to console. 
      */
     public constructor(
-        elementId: string,
+        element: string | HTMLElement,
         config: Html5QrcodeScannerConfig | undefined,
         verbose: boolean | undefined) {
-        this.elementId = elementId;
+
+        if (typeof element === "string") {
+            if (!document.getElementById(element)) {
+                throw `HTML Element with id=${element} not found`;
+            }
+
+            this.element = document.getElementById(element)!;
+        } else {
+            this.element = element;
+        }
+
         this.config = this.createConfig(config);
         this.verbose = verbose === true;
 
-        if (!document.getElementById(elementId)) {
-            throw `HTML Element with id=${elementId} not found`;
-        }
 
         this.currentScanType = Html5QrcodeScanType.SCAN_TYPE_CAMERA;
         this.sectionSwapAllowed = true;
@@ -186,10 +193,7 @@ export class Html5QrcodeScanner {
             }
         };
 
-        const container = document.getElementById(this.elementId);
-        if (!container) {
-            throw `HTML Element with id=${this.elementId} not found`;
-        }
+        const container = this.element;
         container.innerHTML = "";
         this.createBasicLayout(container!);
         this.html5Qrcode = new Html5Qrcode(
@@ -264,7 +268,7 @@ export class Html5QrcodeScanner {
      */
     public clear(): Promise<void> {
         const emptyHtmlContainer = () => {
-            const mainContainer = document.getElementById(this.elementId);
+            const mainContainer = this.element;
             if (mainContainer) {
                 mainContainer.innerHTML = "";
                 this.resetBasicLayout(mainContainer);
@@ -537,7 +541,7 @@ export class Html5QrcodeScanner {
 
     private createSectionControlPanel() {
         const $this = this;
-        const section = document.getElementById(this.getDashboardSectionId())!;
+        const section = (this.element.getRootNode() as Document|ShadowRoot).getElementById(this.getDashboardSectionId())!;
         const sectionControlPanel = document.createElement("div");
         section.appendChild(sectionControlPanel);
         const scpCameraScanRegion = document.createElement("div");
@@ -606,7 +610,7 @@ export class Html5QrcodeScanner {
 
     private renderCameraSelection(cameras: Array<CameraDevice>) {
         const $this = this;
-        const scpCameraScanRegion = document.getElementById(
+        const scpCameraScanRegion = (this.element.getRootNode() as Document|ShadowRoot).getElementById(
             this.getDashboardSectionCameraScanRegionId())!;
         scpCameraScanRegion.style.textAlign = "center";
 
@@ -751,7 +755,7 @@ export class Html5QrcodeScanner {
         const TEXT_IF_FILE_SCAN_SELECTED
             = Html5QrcodeScannerStrings.textIfFileScanSelected();
 
-        const section = document.getElementById(this.getDashboardSectionId())!;
+        const section = (this.element.getRootNode() as Document|ShadowRoot).getElementById(this.getDashboardSectionId())!;
         const switchContainer = document.createElement("div");
         switchContainer.style.textAlign = "center";
         const swithToFileBasedLink = document.createElement("a");
@@ -803,7 +807,7 @@ export class Html5QrcodeScanner {
     }
 
     private resetHeaderMessage() {
-        const messageDiv = document.getElementById(
+        const messageDiv = (this.element.getRootNode() as Document|ShadowRoot).getElementById(
             this.getHeaderMessageContainerId())!;
         messageDiv.style.display = "none";
     }
@@ -847,7 +851,7 @@ export class Html5QrcodeScanner {
 
     private insertCameraScanImageToScanRegion() {
         const $this = this;
-        const qrCodeScanRegion = document.getElementById(
+        const qrCodeScanRegion = (this.element.getRootNode() as Document|ShadowRoot).getElementById(
             this.getScanRegionId())!;
 
         if (this.cameraScanImage) {
@@ -868,7 +872,7 @@ export class Html5QrcodeScanner {
 
     private insertFileScanImageToScanRegion() {
         const $this = this;
-        const qrCodeScanRegion = document.getElementById(
+        const qrCodeScanRegion = (this.element.getRootNode() as Document|ShadowRoot).getElementById(
             this.getScanRegionId())!;
 
         if (this.fileScanImage) {
@@ -888,7 +892,7 @@ export class Html5QrcodeScanner {
     }
 
     private clearScanRegion() {
-        const qrCodeScanRegion = document.getElementById(
+        const qrCodeScanRegion = (this.element.getRootNode() as Document|ShadowRoot).getElementById(
             this.getScanRegionId())!;
         qrCodeScanRegion.innerHTML = "";
     }
@@ -935,26 +939,26 @@ export class Html5QrcodeScanner {
     }
 
     private getCameraScanRegion(): HTMLElement {
-        return document.getElementById(
+        return (this.element.getRootNode() as Document|ShadowRoot).getElementById(
             this.getDashboardSectionCameraScanRegionId())!;
     }
 
     private getFileScanRegion(): HTMLElement {
-        return document.getElementById(
+        return (this.element.getRootNode() as Document|ShadowRoot).getElementById(
             this.getDashboardSectionFileScanRegionId())!;
     }
 
     private getFileScanInput(): HTMLInputElement {
-        return <HTMLInputElement>document.getElementById(
+        return <HTMLInputElement>(this.element.getRootNode() as Document|ShadowRoot).getElementById(
             this.getFileScanInputId())!;
     }
 
     private getDashboardSectionSwapLink(): HTMLElement {
-        return document.getElementById(this.getDashboardSectionSwapLinkId())!;
+        return (this.element.getRootNode() as Document|ShadowRoot).getElementById(this.getDashboardSectionSwapLinkId())!;
     }
 
     private getHeaderMessageDiv(): HTMLElement {
-        return document.getElementById(this.getHeaderMessageContainerId())!;
+        return (this.element.getRootNode() as Document|ShadowRoot).getElementById(this.getHeaderMessageContainerId())!;
     }
     //#endregion
     //#endregion
